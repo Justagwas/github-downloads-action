@@ -1,8 +1,8 @@
 {
   "name": "github-downloads-action",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
-  "description": "GitHub Action to publish release download snapshots.",
+  "description": "Track release downloads with a GitHub Action that writes badge-ready JSON and optional SVG charts.",
   "main": "src/index.js",
   "scripts": {
     "lint:style": "node scripts/style-check.js",

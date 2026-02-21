@@ -1,5 +1,5 @@
 name: "GitHub Downloads Action"
-description: "Compute and publish public GitHub release asset download snapshots to gh-pages."
+description: "Track release downloads with a GitHub Action that writes badge-ready JSON and optional SVG charts."
 author: "justagwas"
 
 inputs:
