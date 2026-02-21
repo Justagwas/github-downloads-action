@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "1",
+  "owner": "Justagwas",
+  "repo": "github-downloads-action",
+  "visibility": "private",
+  "generatedAt": "2026-02-21T12:41:03.656Z",
+  "stats": {
+    "total": 0,
+    "day": 0,
+    "week": 0,
+    "month": 0
+  },
+  "partial": {
+    "day": true,
+    "week": true,
+    "month": true
+  },
+  "snapshots": {
+    "windowDays": 45,
+    "count": 1,
+    "firstDate": "2026-02-21",
+    "lastDate": "2026-02-21",
+    "series": {
+      "2026-02-21": 0
+    }
+  },
+  "profile": {
+    "defaultMode": "daily",
+    "hourlyEnabled": false
+  }
+}
