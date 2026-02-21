@@ -7,7 +7,7 @@
 [![Actionlint](https://github.com/justagwas/github-downloads-action/actions/workflows/actionlint.yml/badge.svg)](https://github.com/justagwas/github-downloads-action/actions/workflows/actionlint.yml)
 [![CodeQL](https://github.com/justagwas/github-downloads-action/actions/workflows/codeql.yml/badge.svg)](https://github.com/justagwas/github-downloads-action/actions/workflows/codeql.yml)
 
-Track release downloads with a GitHub Action that writes badge-ready JSON and optional SVG charts.
+Track total, daily, weekly, and monthly release downloads with a GitHub Action that writes badge-ready JSON and optional SVG charts.
 
 No separate API server needed.
 
