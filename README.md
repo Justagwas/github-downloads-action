@@ -7,28 +7,39 @@
 [![Actionlint](https://github.com/justagwas/github-downloads-action/actions/workflows/actionlint.yml/badge.svg)](https://github.com/justagwas/github-downloads-action/actions/workflows/actionlint.yml)
 [![CodeQL](https://github.com/justagwas/github-downloads-action/actions/workflows/codeql.yml/badge.svg)](https://github.com/justagwas/github-downloads-action/actions/workflows/codeql.yml)
 
-This GitHub Action tracks release download counts and publishes them as static JSON your badges can read.
+Track release downloads with a GitHub Action that writes badge-ready JSON and optional SVG charts.
 
 No separate API server needed.
 
-## Quick setup (about 30 seconds)
+## Start here (quick install)
 
-1. Add `.github/workflows/gh-dl-daily.yml` from the manual quick start below.
-2. Run `gh-dl-daily` once with `workflow_dispatch`.
-3. Add one or both badges to your README (replace `_OWNER_`/`_REPOSITORY_`):
+1. Open the Marketplace listing: `https://github.com/marketplace/actions/github-downloads-action`
+2. Click `Use latest action`, then create a workflow in your repo.
+3. Pick a template and paste it into `.github/workflows/`:
+   - Daily JSON only: https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily.yml
+   - Hourly profile: https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-hourly.yml
+   - Daily JSON + charts: https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily-with-chart.yml
+4. Run the workflow once with `workflow_dispatch`.
+5. Add one or both badges to your README (replace `_OWNER_`/`_REPOSITORY_`):
 
 ```md
 ![Downloads total](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2F_OWNER_%2F_REPOSITORY_%2Fgh-pages%2Fgh-dl%2Fdownloads.json&query=%24.stats.total&label=downloads%2Ftotal&color=0A7EA4)
 ![Downloads / day](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2F_OWNER_%2F_REPOSITORY_%2Fgh-pages%2Fgh-dl%2Fdownloads.json&query=%24.stats.day&label=downloads%2Fday&color=1E8E3E)
 ```
 
-## Interactive site
+Use one of the templates above for a working setup.
 
-If you want a visual setup flow (with live badge/chart generators), use:
+## Useful links
 
-- Project page: `https://justagwas.com/projects/gda`
-- Generator Lab: `https://justagwas.com/projects/gda#generator-lab`
-- The generator supports chart date formats, generated footer toggle, and title mode presets.
+- Visual setup + generators:
+  - Project page: https://justagwas.com/projects/gda
+  - Generator Lab: https://justagwas.com/projects/gda#generator-lab
+- Badge examples: [README badge examples (copy-paste)](#readme-badge-examples-copy-paste)
+- Charts and chart options: [Charts (optional)](#charts-optional)
+- All inputs: [Inputs](#inputs)
+- All outputs: [Outputs](#outputs)
+- Troubleshooting: [Troubleshooting](#troubleshooting)
+- JSON schema: [Published JSON schema](#published-json-schema)
 
 Note: private repositories usually cannot render public badges.
 Note: this repository has little/no release-asset activity, so preview values are expected to be low.
@@ -505,8 +516,11 @@ If your repository has few or no release-asset downloads, totals and deltas will
 ## Repo templates
 
 - `templates/workflows/gh-dl-daily.yml`
+  - https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily.yml
 - `templates/workflows/gh-dl-hourly.yml`
+  - https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-hourly.yml
 - `templates/workflows/gh-dl-daily-with-chart.yml`
+  - https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily-with-chart.yml
 
 Use `gh-dl-daily-with-chart.yml` when you want one workflow to publish both badge JSON and chart SVG outputs.
 
