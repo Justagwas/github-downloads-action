@@ -1,0 +1,60 @@
+name: auto-release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve tag
+        id: resolve
+        shell: bash
+        run: |
+          input_tag="${{ github.event.inputs.tag }}"
+          ref_tag="${GITHUB_REF#refs/tags/}"
+          if [[ -n "$input_tag" ]]; then
+            echo "tag=$input_tag" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "tag=$ref_tag" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish GitHub release
+        if: ${{ steps.resolve.outputs.tag != '' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ steps.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
+            notes_file="$(mktemp)"
+            gh api --method POST "repos/$REPOSITORY/releases/generate-notes" -f tag_name="$TAG" --jq '.body' > "$notes_file"
+            gh release edit "$TAG" --repo "$REPOSITORY" --notes-file "$notes_file"
+            rm -f "$notes_file"
+            echo "Updated release notes for $TAG."
+          else
+            gh release create "$TAG" --repo "$REPOSITORY" --verify-tag --generate-notes
+            echo "Created release for $TAG."
+          fi
+
+      - name: Fail when no tag was resolved
+        if: ${{ steps.resolve.outputs.tag == '' }}
+        shell: bash
+        run: |
+          echo "No tag was resolved."
+          exit 1

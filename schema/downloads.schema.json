@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gh-dl.justagwas.com/schema/downloads.schema.json",
+  "title": "GitHub Downloads Snapshot",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "owner",
+    "repo",
+    "visibility",
+    "generatedAt",
+    "stats",
+    "partial",
+    "snapshots",
+    "profile"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1"
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "visibility": {
+      "type": "string",
+      "enum": ["public", "private"]
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stats": {
+      "type": "object",
+      "required": ["total", "day", "week", "month"],
+      "properties": {
+        "total": { "type": "number", "minimum": 0 },
+        "day": { "type": "number", "minimum": 0 },
+        "week": { "type": "number", "minimum": 0 },
+        "month": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "partial": {
+      "type": "object",
+      "required": ["day", "week", "month"],
+      "properties": {
+        "day": { "type": "boolean" },
+        "week": { "type": "boolean" },
+        "month": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "snapshots": {
+      "type": "object",
+      "required": ["windowDays", "count", "firstDate", "lastDate", "series"],
+      "properties": {
+        "windowDays": { "type": "integer", "minimum": 1 },
+        "count": { "type": "integer", "minimum": 0 },
+        "firstDate": {
+          "type": ["string", "null"],
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "lastDate": {
+          "type": ["string", "null"],
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "series": {
+          "type": "object",
+          "patternProperties": {
+            "^\\d{4}-\\d{2}-\\d{2}$": { "type": "number", "minimum": 0 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "profile": {
+      "type": "object",
+      "required": ["defaultMode", "hourlyEnabled"],
+      "properties": {
+        "defaultMode": {
+          "type": "string",
+          "enum": ["daily", "hourly"]
+        },
+        "hourlyEnabled": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

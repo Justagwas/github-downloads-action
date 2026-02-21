@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 360" role="img" aria-label="owner/repo release downloads (daily delta) chart">
+  <defs>
+    <linearGradient id="fill-daily-black" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.32"/>
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0.05"/>
+    </linearGradient>
+    <style>
+      .bg { fill: #0b0b0d; }
+      .title { font: 700 24px Arial, sans-serif; fill: #f8fafc; }
+      .sub { font: 400 13px Arial, sans-serif; fill: #cbd5e1; }
+      .grid { stroke: #1f2937; stroke-width: 1; }
+      .axis { font: 400 12px Arial, sans-serif; fill: #94a3b8; }
+      .line { fill: none; stroke: #22d3ee; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+      .dot { fill: #22d3ee; }
+      .value { font: 600 11px Arial, sans-serif; fill: #cbd5e1; }
+      .latest { font: 700 14px Arial, sans-serif; fill: #f8fafc; }
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1000" height="360" rx="16" />
+  <text class="title" x="64" y="34">owner/repo release downloads (daily delta)</text>
+  <text class="sub" x="64" y="352">Generated 2026-02-21T00:00:00.000Z</text>
+  <line x1="64" y1="52.00" x2="976" y2="52.00" class="grid"/>
+  <text x="56" y="56.00" text-anchor="end" class="axis">108</text>
+  <line x1="64" y1="77.20" x2="976" y2="77.20" class="grid"/>
+  <text x="56" y="81.20" text-anchor="end" class="axis">97</text>
+  <line x1="64" y1="102.40" x2="976" y2="102.40" class="grid"/>
+  <text x="56" y="106.40" text-anchor="end" class="axis">86</text>
+  <line x1="64" y1="127.60" x2="976" y2="127.60" class="grid"/>
+  <text x="56" y="131.60" text-anchor="end" class="axis">76</text>
+  <line x1="64" y1="152.80" x2="976" y2="152.80" class="grid"/>
+  <text x="56" y="156.80" text-anchor="end" class="axis">65</text>
+  <line x1="64" y1="178.00" x2="976" y2="178.00" class="grid"/>
+  <text x="56" y="182.00" text-anchor="end" class="axis">54</text>
+  <line x1="64" y1="203.20" x2="976" y2="203.20" class="grid"/>
+  <text x="56" y="207.20" text-anchor="end" class="axis">43</text>
+  <line x1="64" y1="228.40" x2="976" y2="228.40" class="grid"/>
+  <text x="56" y="232.40" text-anchor="end" class="axis">32</text>
+  <line x1="64" y1="253.60" x2="976" y2="253.60" class="grid"/>
+  <text x="56" y="257.60" text-anchor="end" class="axis">22</text>
+  <line x1="64" y1="278.80" x2="976" y2="278.80" class="grid"/>
+  <text x="56" y="282.80" text-anchor="end" class="axis">11</text>
+  <line x1="64" y1="304.00" x2="976" y2="304.00" class="grid"/>
+  <text x="56" y="308.00" text-anchor="end" class="axis">0</text>
+  <path d="M 64.00 304 L 64.00 304.00 L 194.29 304.00 L 324.57 304.00 L 454.86 304.00 L 585.14 304.00 L 715.43 304.00 L 845.71 304.00 L 976.00 52.00 L 976.00 304 Z" fill="url(#fill-daily-black)"/>
+  <polyline class="line" points="64.00,304.00 194.29,304.00 324.57,304.00 454.86,304.00 585.14,304.00 715.43,304.00 845.71,304.00 976.00,52.00"/>
+  <circle class="dot" cx="976.00" cy="52.00" r="4.5"/>
+  <text class="value" x="64.00" y="296.00" text-anchor="middle">0</text>
+  <text class="value" x="194.29" y="296.00" text-anchor="middle">0</text>
+  <text class="value" x="324.57" y="296.00" text-anchor="middle">0</text>
+  <text class="value" x="454.86" y="296.00" text-anchor="middle">0</text>
+  <text class="value" x="585.14" y="296.00" text-anchor="middle">0</text>
+  <text class="value" x="715.43" y="296.00" text-anchor="middle">0</text>
+  <text class="value" x="845.71" y="296.00" text-anchor="middle">0</text>
+  <text class="value" x="976.00" y="63.00" text-anchor="middle">108</text>
+  <text class="axis" x="64.00" y="336" text-anchor="start">2026-01-15</text>
+  <text class="axis" x="194.29" y="336" text-anchor="middle">2026-01-22</text>
+  <text class="axis" x="324.57" y="336" text-anchor="middle">2026-01-29</text>
+  <text class="axis" x="454.86" y="336" text-anchor="middle">2026-02-05</text>
+  <text class="axis" x="585.14" y="336" text-anchor="middle">2026-02-12</text>
+  <text class="axis" x="715.43" y="336" text-anchor="middle">2026-02-16</text>
+  <text class="axis" x="845.71" y="336" text-anchor="middle">2026-02-20</text>
+  <text class="axis" x="976.00" y="336" text-anchor="end">2026-02-21</text>
+  <text class="latest" x="976" y="34" text-anchor="end">Latest day: 108</text>
+</svg>

@@ -1,0 +1,126 @@
+name: "GitHub Downloads Action"
+description: "Compute and publish public GitHub release asset download snapshots to gh-pages."
+author: "justagwas"
+
+inputs:
+  token:
+    description: "GitHub token used for API requests and publishing. Pass secrets.GITHUB_TOKEN."
+    required: false
+  owner:
+    description: "Target repository owner. Defaults to the current workflow repository owner."
+    required: false
+  repo:
+    description: "Target repository name. Defaults to the current workflow repository name."
+    required: false
+  window_days:
+    description: "Rolling snapshot window length in days."
+    required: false
+    default: "45"
+  enable_hourly_profile:
+    description: "When true, marks profile.defaultMode as hourly."
+    required: false
+    default: "false"
+  output_branch:
+    description: "Branch where downloads JSON should be written."
+    required: false
+    default: "gh-pages"
+  output_path:
+    description: "Path (within output_branch) for downloads JSON."
+    required: false
+    default: "gh-dl/downloads.json"
+  min_refresh_minutes:
+    description: "Optional cache window. When >0, reuse the previous total if it was generated within this many minutes."
+    required: false
+    default: "0"
+  publish_chart:
+    description: "When true, publishes SVG charts alongside downloads.json."
+    required: false
+    default: "false"
+  chart_output_path:
+    description: "Path (within output_branch) for chart SVG."
+    required: false
+    default: "gh-dl/downloads-trend.svg"
+  chart_types:
+    description: "Comma-separated chart types: total-trend,daily,weekly,monthly."
+    required: false
+    default: "total-trend"
+  chart_themes:
+    description: "Comma-separated chart themes: black,slate,orange."
+    required: false
+    default: "slate"
+  charts_output_dir:
+    description: "Directory (within output_branch) for generated chart matrix files."
+    required: false
+    default: "gh-dl/charts"
+  chart_width:
+    description: "Chart width in pixels."
+    required: false
+    default: "1000"
+  chart_height:
+    description: "Chart height in pixels."
+    required: false
+    default: "360"
+  chart_zero_baseline:
+    description: "When true, forces the chart Y-axis baseline to start at 0."
+    required: false
+    default: "true"
+  chart_y_ticks:
+    description: "Y-axis interval count (higher means more grid/value lines)."
+    required: false
+    default: "6"
+  chart_x_label_every_days:
+    description: "Date label spacing in days (0 = auto spacing)."
+    required: false
+    default: "0"
+  chart_show_value_labels:
+    description: "When true, renders numeric labels above each point."
+    required: false
+    default: "false"
+
+outputs:
+  owner:
+    description: "Resolved owner."
+  repo:
+    description: "Resolved repo."
+  generated_at:
+    description: "ISO-8601 UTC generation timestamp."
+  total:
+    description: "Computed total release asset downloads."
+  day:
+    description: "Computed day delta."
+  week:
+    description: "Computed week delta."
+  month:
+    description: "Computed month delta."
+  partial_day:
+    description: "Whether day value is partial."
+  partial_week:
+    description: "Whether week value is partial."
+  partial_month:
+    description: "Whether month value is partial."
+  total_source:
+    description: "Whether total came from GitHub API or a fresh cached value."
+  chart_output_path:
+    description: "Chart output path used."
+  chart_published:
+    description: "Whether any chart SVG was updated in this run."
+  chart_published_count:
+    description: "Number of chart SVG files updated in this run."
+  chart_total_count:
+    description: "Number of chart SVG files targeted in this run."
+  chart_files:
+    description: "Comma-separated list of generated chart paths."
+  output_branch:
+    description: "Output branch used."
+  output_path:
+    description: "Output path used."
+  published:
+    description: "Whether downloads.json was updated in this run."
+
+runs:
+  using: "node20"
+  main: "src/index.js"
+
+branding:
+  icon: "download"
+  color: "gray-dark"

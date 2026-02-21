@@ -1,0 +1,68 @@
+name: sync-labels
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/labels.json"
+      - ".github/workflows/sync-labels.yml"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      - name: Upsert labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("node:fs");
+
+            const labelPath = ".github/labels.json";
+            const text = fs.readFileSync(labelPath, "utf8");
+            const labels = JSON.parse(text);
+            if (!Array.isArray(labels)) {
+              throw new Error(`${labelPath} must contain a JSON array.`);
+            }
+
+            for (const label of labels) {
+              const { name, color, description } = label;
+              if (!name || !color) {
+                throw new Error(`Invalid label entry: ${JSON.stringify(label)}`);
+              }
+
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name,
+                });
+
+                await github.rest.issues.updateLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name,
+                  new_name: name,
+                  color,
+                  description,
+                });
+                core.info(`Updated label: ${name}`);
+              } catch (error) {
+                if (error.status !== 404) throw error;
+
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name,
+                  color,
+                  description,
+                });
+                core.info(`Created label: ${name}`);
+              }
+            }

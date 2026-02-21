@@ -1,0 +1,16 @@
+{
+  "name": "github-downloads-action",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GitHub Action to publish release download snapshots.",
+  "main": "src/index.js",
+  "scripts": {
+    "lint:style": "node scripts/style-check.js",
+    "test": "npm run lint:style && node tests/run-tests.js && node compat/run-compat.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "Apache-2.0"
+}
+
