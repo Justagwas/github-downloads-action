@@ -13,10 +13,15 @@ No separate API server needed.
 
 ## Start here (quick install)
 
-1. Pick one template and download/copy it:
-   - Daily JSON only: https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily.yml
-   - Hourly profile: https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-hourly.yml
-   - Daily JSON + charts: https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily-with-chart.yml
+Choose one setup template:
+
+| Setup | Use when | Template |
+|---|---|---|
+| Daily JSON only | You only want badge data (`downloads.json`) | https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily.yml |
+| Hourly profile | You want more frequent snapshots | https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-hourly.yml |
+| Daily JSON + charts | You want badges plus published SVG charts | https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily-with-chart.yml |
+
+1. Download/copy your selected template.
 2. Put the file in your repo under `.github/workflows/`.
 3. Commit and push.
 4. Run the workflow once with `workflow_dispatch`.
@@ -27,19 +32,7 @@ No separate API server needed.
 ![Downloads / day](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2F_OWNER_%2F_REPOSITORY_%2Fgh-pages%2Fgh-dl%2Fdownloads.json&query=%24.stats.day&label=downloads%2Fday&color=1E8E3E)
 ```
 
-Use one of the templates above for a working setup.
-
-## Useful links
-
-- Visual setup + generators:
-  - Project page: https://justagwas.com/projects/gda
-  - Generator Lab: https://justagwas.com/projects/gda#generator-lab
-- Badge examples: [README badge examples (copy-paste)](#readme-badge-examples-copy-paste)
-- Charts and chart options: [Charts (optional)](#charts-optional)
-- All inputs: [Inputs](#inputs)
-- All outputs: [Outputs](#outputs)
-- Troubleshooting: [Troubleshooting](#troubleshooting)
-- JSON schema: [Published JSON schema](#published-json-schema)
+Marketplace listing: https://github.com/marketplace/actions/github-downloads-action
 
 Note: private repositories usually cannot render public badges.
 Note: this repository has little/no release-asset activity, so preview values are expected to be low.
@@ -103,60 +96,6 @@ Alternative jsDelivr pattern:
 ```text
 https://cdn.jsdelivr.net/gh/<_OWNER_>/<_REPO_>@gh-pages/gh-dl/downloads.json
 ```
-
-## Manual quick start (copy-paste)
-
-Create `.github/workflows/gh-dl-daily.yml`:
-
-```yaml
-name: gh-dl-daily
-
-on:
-  schedule:
-    - cron: "0 3 * * *"
-  workflow_dispatch:
-
-concurrency:
-  group: gh-dl-${{ github.repository }}-${{ github.ref }}
-  cancel-in-progress: false
-
-permissions:
-  contents: write
-
-jobs:
-  publish-downloads:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
-      - name: Publish downloads.json to gh-pages
-        uses: justagwas/github-downloads-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          window_days: "45"
-          enable_hourly_profile: "false"
-          output_branch: "gh-pages"
-          output_path: "gh-dl/downloads.json"
-          min_refresh_minutes: "0"
-          publish_chart: "false"
-          chart_output_path: "gh-dl/downloads-trend.svg"
-```
-
-Optional hourly mode:
-
-- set `enable_hourly_profile: "true"`
-- schedule hourly (`0 * * * *`)
-- optionally set `min_refresh_minutes` to reuse a fresh cached total and reduce API load
-- see **Charts (optional)** below for chart setup and preview.
-
-## Quick install checklist
-
-1. Add `.github/workflows/gh-dl-daily.yml` from this README.
-2. Run `gh-dl-daily` once via `workflow_dispatch`.
-3. Open your source URL and confirm it returns JSON:
-   `https://raw.githubusercontent.com/<_OWNER_>/<_REPO_>/gh-pages/gh-dl/downloads.json`
-4. Add one badge to README using that same URL.
-5. Confirm badge value appears; then check again after next scheduled run.
 
 ## Warm-up period (important)
 
@@ -513,16 +452,17 @@ For new repos, expect `partial.week/month = true` until enough days are collecte
 
 If your repository has few or no release-asset downloads, totals and deltas will naturally stay low. This repository itself has minimal release-asset activity, so its preview values are intentionally modest.
 
-## Repo templates
+## More guides
 
-- `templates/workflows/gh-dl-daily.yml`
-  - https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily.yml
-- `templates/workflows/gh-dl-hourly.yml`
-  - https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-hourly.yml
-- `templates/workflows/gh-dl-daily-with-chart.yml`
-  - https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily-with-chart.yml
-
-Use `gh-dl-daily-with-chart.yml` when you want one workflow to publish both badge JSON and chart SVG outputs.
+- Visual setup + generators:
+  - Project page: https://justagwas.com/projects/gda
+  - Generator Lab: https://justagwas.com/projects/gda#generator-lab
+- Badge examples: [README badge examples (copy-paste)](#readme-badge-examples-copy-paste)
+- Charts and chart options: [Charts (optional)](#charts-optional)
+- All inputs: [Inputs](#inputs)
+- All outputs: [Outputs](#outputs)
+- Troubleshooting: [Troubleshooting](#troubleshooting)
+- JSON schema: [Published JSON schema](#published-json-schema)
 
 ## Issue labels
 
@@ -547,9 +487,9 @@ Use `gh-dl-daily-with-chart.yml` when you want one workflow to publish both badg
 - Code owners: `.github/CODEOWNERS`
 - Code of conduct: `.github/CODE_OF_CONDUCT.md`
 - Security policy: `.github/SECURITY.md`
-- Support policy: `SUPPORT.md`
-- Privacy notice: `PRIVACY.md`
-- Marketplace EULA: `EULA.md`
+- Support policy: `.github/SUPPORT.md`
+- Privacy notice: `.github/PRIVACY.md`
+- Marketplace EULA: `.github/EULA.md`
 
 ## License
 
