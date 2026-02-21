@@ -6,7 +6,8 @@
   "main": "src/index.js",
   "scripts": {
     "lint:style": "node scripts/style-check.js",
-    "test": "npm run lint:style && node tests/run-tests.js && node compat/run-compat.js"
+    "test": "npm run lint:style && node tests/run-tests.js && node compat/run-compat.js",
+    "check:release": "node scripts/release-check.js"
   },
   "engines": {
     "node": ">=20"

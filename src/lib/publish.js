@@ -197,6 +197,10 @@ async function publishChartIfEnabled({ client, inputs, payload, commitMessage, l
       yTicks: inputs.chartYTicks,
       xLabelEveryDays: inputs.chartXLabelEveryDays,
       showValueLabels: inputs.chartShowValueLabels,
+      dateLabelFormat: inputs.chartDateLabelFormat,
+      showGeneratedAt: inputs.chartShowGeneratedAt,
+      titleMode: inputs.chartTitleMode,
+      titleText: inputs.chartTitleText,
     });
 
     const published = await publishSingleChart({

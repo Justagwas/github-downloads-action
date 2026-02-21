@@ -15,7 +15,24 @@ permissions:
   contents: write
 
 jobs:
+  validate-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Run tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test
+      - name: Run release sanity checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run check:release
+
   publish-release:
+    needs:
+      - validate-release
     runs-on: ubuntu-latest
     steps:
       - name: Resolve tag

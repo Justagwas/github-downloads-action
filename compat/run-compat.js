@@ -161,6 +161,23 @@ function testParseActionInputs() {
   assert.equal(parsed.chartYTicks, 6);
   assert.equal(parsed.chartXLabelEveryDays, 0);
   assert.equal(parsed.chartShowValueLabels, false);
+  assert.equal(parsed.chartDateLabelFormat, "yyyy-mm-dd");
+  assert.equal(parsed.chartShowGeneratedAt, true);
+  assert.equal(parsed.chartTitleMode, "default");
+  assert.equal(parsed.chartTitleText, "");
+}
+
+function testRejectsChartOutputCollision() {
+  assert.throws(
+    () =>
+      parseActionInputs({
+        GITHUB_REPOSITORY: "x/y",
+        INPUT_PUBLISH_CHART: "true",
+        INPUT_OUTPUT_PATH: "gh-dl/downloads.json",
+        INPUT_CHART_OUTPUT_PATH: "gh-dl/downloads.json",
+      }),
+    /overlaps chart output files/,
+  );
 }
 
 function testBuildTrendChartSvg() {
@@ -176,7 +193,7 @@ function testBuildTrendChartSvg() {
 
   assert.match(svg, /<svg/);
   assert.match(svg, /Latest total: 120/);
-  assert.match(svg, /x\/y release downloads \(total trend\)/);
+  assert.match(svg, /x\/y release downloads/);
 }
 
 function testBuildChartSvgVariants() {
@@ -191,6 +208,10 @@ function testBuildChartSvgVariants() {
     yTicks: 9,
     xLabelEveryDays: 1,
     showValueLabels: true,
+    dateLabelFormat: "dd/mm",
+    showGeneratedAt: false,
+    titleMode: "custom",
+    titleText: "Custom heading demo",
     series: {
       "2026-02-10": 100,
       "2026-02-17": 140,
@@ -198,11 +219,30 @@ function testBuildChartSvgVariants() {
     },
   });
 
-  assert.match(svg, /weekly delta/);
   assert.match(svg, /Latest week: 5/);
   assert.match(svg, /viewBox="0 0 900 320"/);
-  assert.match(svg, /text-anchor="middle">2026-02-17</);
+  assert.match(svg, /text-anchor="middle">17\/02</);
   assert.match(svg, /class="value"/);
+  assert.doesNotMatch(svg, /Generated /);
+  assert.match(svg, /Custom heading demo/);
+}
+
+function testBuildChartSvgHidesDateLabelsWhenDisabled() {
+  const svg = buildChartSvg({
+    owner: "x",
+    repo: "y",
+    generatedAt: "2026-02-18T10:00:00.000Z",
+    chartType: "daily",
+    chartTheme: "slate",
+    dateLabelFormat: "none",
+    series: {
+      "2026-02-17": 10,
+      "2026-02-18": 11,
+    },
+  });
+
+  assert.doesNotMatch(svg, /text-anchor="(start|middle|end)">\d{4}-\d{2}-\d{2}</);
+  assert.match(svg, /Generated 2026-02-18/);
 }
 
 function run() {
@@ -212,8 +252,10 @@ function run() {
   testMergeWindow();
   testValidateBranch();
   testParseActionInputs();
+  testRejectsChartOutputCollision();
   testBuildTrendChartSvg();
   testBuildChartSvgVariants();
+  testBuildChartSvgHidesDateLabelsWhenDisabled();
   console.log("compat checks passed");
 }
 

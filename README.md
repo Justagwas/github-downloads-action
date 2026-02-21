@@ -7,11 +7,11 @@
 [![Actionlint](https://github.com/justagwas/github-downloads-action/actions/workflows/actionlint.yml/badge.svg)](https://github.com/justagwas/github-downloads-action/actions/workflows/actionlint.yml)
 [![CodeQL](https://github.com/justagwas/github-downloads-action/actions/workflows/codeql.yml/badge.svg)](https://github.com/justagwas/github-downloads-action/actions/workflows/codeql.yml)
 
-GitHub Action for publishing release download metrics as static JSON that badges can read directly.
+This GitHub Action tracks release download counts and publishes them as static JSON your badges can read.
 
-No API server required.
+No separate API server needed.
 
-## 30-second setup
+## Quick setup (about 30 seconds)
 
 1. Add `.github/workflows/gh-dl-daily.yml` from the manual quick start below.
 2. Run `gh-dl-daily` once with `workflow_dispatch`.
@@ -22,31 +22,39 @@ No API server required.
 ![Downloads / day](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2F_OWNER_%2F_REPOSITORY_%2Fgh-pages%2Fgh-dl%2Fdownloads.json&query=%24.stats.day&label=downloads%2Fday&color=1E8E3E)
 ```
 
+## Interactive site
+
+If you want a visual setup flow (with live badge/chart generators), use:
+
+- Project page: `https://justagwas.com/projects/gda`
+- Generator Lab: `https://justagwas.com/projects/gda#generator-lab`
+- The generator supports chart date formats, generated footer toggle, and title mode presets.
+
 Note: private repositories usually cannot render public badges.
-Note: this repository has little/no release-asset activity, so previewed download values are expected to be low.
+Note: this repository has little/no release-asset activity, so preview values are expected to be low.
 
-## Why this exists
+## Why this action exists
 
-GitHub does not provide users with daily, weekly, or monthly download statistics.
+GitHub does not give you built-in daily/weekly/monthly release download stats.
 
-Querying the GitHub Releases API on every request can trigger rate limits and unreliable results.
+Polling the GitHub Releases API on every badge request is noisy and can hit rate limits.
 
-This action flips the model:
+This action keeps things simple:
 
-- each repository computes its own download totals on a schedule
-- the repository publishes one static JSON file
-- badges read that static file URL
+- each repository computes its own totals on a schedule
+- it publishes one static JSON file
+- badges read that file URL
 
-That keeps the system simple, scalable, and cheap.
+Result: simple, scalable, and low-maintenance.
 
-## How it works
+## How it works (short version)
 
 1. The action reads all releases for a target repo and sums release asset `download_count` values.
 2. It merges today's total into a rolling snapshot series (`window_days`, default `45`).
 3. It computes `total`, `day` (1-day delta), `week` (7-day delta), and `month` (30-day delta).
 4. It marks `partial.day/week/month` when exact baseline coverage is missing.
 5. It writes JSON to `output_branch:output_path` (default `gh-pages:gh-dl/downloads.json`).
-6. Optional: it can also write static SVG charts (`publish_chart: "true"`) across chart type/theme combinations.
+6. Optional: it can also publish static SVG charts (`publish_chart: "true"`) across chart type/theme combinations.
 
 ## Architecture at a glance
 
@@ -62,9 +70,9 @@ flowchart LR
   F --> H[README image/chart preview]
 ```
 
-## About the "source" URL
+## About the source URL
 
-Your badge source is just the public URL of the published JSON file.
+Your badge source is simply the public URL of the JSON file this action publishes.
 
 Default source URL pattern:
 
@@ -72,12 +80,12 @@ Default source URL pattern:
 https://raw.githubusercontent.com/<_OWNER_>/<_REPO_>/gh-pages/gh-dl/downloads.json
 ```
 
-`gh-pages` here is only a branch used to store generated data. You do not need to enable GitHub Pages site hosting for this action to work.
+`gh-pages` here is just a storage branch for generated data. You do not need to enable GitHub Pages site hosting for this to work.
 
-Raw vs jsDelivr:
+`raw` vs `jsDelivr`:
 
 - `raw.githubusercontent.com` (default in this README): direct and simple.
-- `cdn.jsdelivr.net`: often faster globally, but CDN cache lag can be longer in some cases.
+- `cdn.jsdelivr.net`: often faster globally, but cache lag can be longer in some cases.
 
 Alternative jsDelivr pattern:
 
@@ -108,7 +116,7 @@ jobs:
   publish-downloads:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Publish downloads.json to gh-pages
         uses: justagwas/github-downloads-action@v1
@@ -123,14 +131,14 @@ jobs:
           chart_output_path: "gh-dl/downloads-trend.svg"
 ```
 
-Optional hourly profile:
+Optional hourly mode:
 
 - set `enable_hourly_profile: "true"`
 - schedule hourly (`0 * * * *`)
 - optionally set `min_refresh_minutes` to reuse a fresh cached total and reduce API load
 - see **Charts (optional)** below for chart setup and preview.
 
-## Quick install + verify checklist
+## Quick install checklist
 
 1. Add `.github/workflows/gh-dl-daily.yml` from this README.
 2. Run `gh-dl-daily` once via `workflow_dispatch`.
@@ -141,13 +149,13 @@ Optional hourly profile:
 
 ## Warm-up period (important)
 
-This action needs historical snapshots before week/month deltas become exact.
+This action needs a bit of history before week/month deltas become exact.
 
 - New repos often show `partial.week = true` and `partial.month = true` at first.
-- `day/week/month` can look lower than expected while history is building.
+- `day/week/month` can look lower than expected while history builds.
 - This is expected behavior, not a bug.
 
-Typical first-30-days behavior:
+Typical first 30 days:
 
 | Snapshot age | `partial.day` | `partial.week` | `partial.month` | Notes |
 |---|---|---|---|---|
@@ -222,7 +230,7 @@ Preview:
 
 ## Charts (optional)
 
-You can publish static SVG charts and embed them in your README.
+You can publish static SVG charts and embed them directly in your README.
 
 Enable chart publishing in workflow:
 
@@ -239,6 +247,10 @@ with:
   chart_y_ticks: "6"
   chart_x_label_every_days: "0"
   chart_show_value_labels: "false"
+  chart_date_label_format: "yyyy-mm-dd"
+  chart_show_generated_at: "true"
+  chart_title_mode: "default"
+  chart_title_text: ""
 ```
 
 Chart options:
@@ -250,10 +262,16 @@ Chart options:
 - `chart_y_ticks`: Y-axis interval count (`2..12`) for denser/sparser value lines
 - `chart_x_label_every_days`: date label spacing (`0` = auto spacing, `1` = every day)
 - `chart_show_value_labels`: render per-point numeric values above the line
+- `chart_date_label_format`: date labels (`yyyy-mm-dd`, `yy/mm/dd`, `dd/mm`, `mm/dd`, `none`)
+- `chart_show_generated_at`: show/hide `Generated <date>` footer text
+- `chart_title_mode`: title style (`default`, `custom`, `none`)
+- `chart_title_text`: custom title text (required only when `chart_title_mode: "custom"`)
 - `chart_output_path`: primary chart path (first `chart_types` + first `chart_themes`)
 - `charts_output_dir`: directory for all matrix charts (`<type>--<theme>.svg`)
 
 Note: `chart_output_path` publishes one primary chart, while `charts_output_dir` publishes the full chart matrix.
+Note: for safety, `output_path` cannot overlap any chart output file when `publish_chart` is enabled.
+Implementation note: chart types/themes/date/title enums are centralized in `src/lib/chart-config.js`.
 
 Dense chart example (more Y values, daily date labels, and numbers):
 
@@ -266,7 +284,17 @@ with:
   chart_y_ticks: "10"
   chart_x_label_every_days: "1"
   chart_show_value_labels: "true"
+  chart_date_label_format: "dd/mm"
+  chart_show_generated_at: "true"
+  chart_title_mode: "custom"
+  chart_title_text: "My repo daily downloads"
 ```
+
+Simple chart presets:
+
+- Clean default trend: keep defaults (`chart_zero_baseline: "true"`, `chart_y_ticks: "6"`, `chart_x_label_every_days: "0"`)
+- Detail-heavy daily chart: set `chart_types: "daily"`, `chart_y_ticks: "10"`, `chart_x_label_every_days: "1"`, `chart_show_value_labels: "true"`
+- Minimal labels (less clutter): keep `chart_show_value_labels: "false"` and use `chart_x_label_every_days: "7"` or higher
 
 Embed the primary chart:
 
@@ -349,7 +377,7 @@ foreach ($d in $defs) {
 
 Schema file: `schema/downloads.schema.json`
 
-The action writes `schemaVersion: "1"` with this structure:
+The action writes `schemaVersion: "1"` using this structure:
 
 ```json
 {
@@ -387,7 +415,7 @@ The action writes `schemaVersion: "1"` with this structure:
 
 ## Stability guarantees
 
-The project maintains the following stability expectations for the `v1` major line:
+For the `v1` major line, the project follows these stability expectations:
 
 - Existing output keys in `downloads.json` will remain stable.
 - `schemaVersion` changes only for explicit schema migrations.
@@ -417,6 +445,10 @@ The project maintains the following stability expectations for the `v1` major li
 | `chart_y_ticks` | No | `6` | integer | Y-axis interval count (`2..12`) |
 | `chart_x_label_every_days` | No | `0` | integer | Date label spacing in days (`0..365`, `0` means auto) |
 | `chart_show_value_labels` | No | `false` | boolean | When true, draws numeric labels above points |
+| `chart_date_label_format` | No | `yyyy-mm-dd` | enum | Date labels: `yyyy-mm-dd`, `yy/mm/dd`, `dd/mm`, `mm/dd`, `none` |
+| `chart_show_generated_at` | No | `true` | boolean | When true, shows `Generated <date>` footer |
+| `chart_title_mode` | No | `default` | enum | `default` (`owner/repo`), `custom` (uses `chart_title_text`), or `none` |
+| `chart_title_text` | No | empty | string | Custom title shown when `chart_title_mode=custom` (max 120 chars) |
 
 ## Outputs
 
@@ -438,7 +470,7 @@ The project maintains the following stability expectations for the `v1` major li
 - Compatibility checks: `compat/run-compat.js`
 - Local command: `npm test`
 
-## Partial flags, plainly
+## Partial flags (plain language)
 
 - `partial: false` means the action found an exact baseline snapshot for that range.
 - `partial: true` means coverage is still warming or has gaps, so the range delta uses best available baseline.
@@ -450,7 +482,7 @@ For new repos, expect `partial.week/month = true` until enough days are collecte
 - Warm-up period: `week` and `month` may be partial until enough history exists.
 - Snapshot model: values are based on snapshot deltas, not event-level analytics.
 - Badge caching: GitHub Raw/Shields caching can delay visible updates.
-- Manual reruns on the same day may result in `published=false` when no material change occurred.
+- Manual reruns on the same day may return `published=false` when there is no material change.
 
 ## Troubleshooting
 
@@ -476,6 +508,8 @@ If your repository has few or no release-asset downloads, totals and deltas will
 - `templates/workflows/gh-dl-hourly.yml`
 - `templates/workflows/gh-dl-daily-with-chart.yml`
 
+Use `gh-dl-daily-with-chart.yml` when you want one workflow to publish both badge JSON and chart SVG outputs.
+
 ## Issue labels
 
 - Label definitions: `.github/labels.json`
@@ -500,10 +534,11 @@ If your repository has few or no release-asset downloads, totals and deltas will
 - Code of conduct: `.github/CODE_OF_CONDUCT.md`
 - Security policy: `.github/SECURITY.md`
 - Support policy: `SUPPORT.md`
+- Privacy notice: `PRIVACY.md`
+- Marketplace EULA: `EULA.md`
 
 ## License
 
 Licensed under the Apache License 2.0 (Apache-2.0).
 
 See [`LICENSE`](LICENSE).
-

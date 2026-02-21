@@ -1,6 +1,11 @@
 "use strict";
 
-const { CHART_TYPES, CHART_THEMES } = require("./chart");
+const {
+  CHART_TYPES,
+  CHART_THEMES,
+  CHART_DATE_LABEL_FORMATS,
+  CHART_TITLE_MODES,
+} = require("./chart-config");
 
 const SLUG_RE = /^[A-Za-z0-9_.-]+$/;
 
@@ -61,6 +66,44 @@ function parseCsvList(value, inputName, defaultValues, allowedValues) {
   }
 
   return unique;
+}
+
+function parseEnum(value, inputName, defaultValue, allowedValues) {
+  const parsed = (value === "" ? defaultValue : value).trim().toLowerCase();
+  if (!allowedValues.includes(parsed)) {
+    throw new Error(
+      `Invalid '${inputName}' value '${value}'. Allowed values: ${allowedValues.join(", ")}.`,
+    );
+  }
+  return parsed;
+}
+
+function buildMatrixChartPaths(chartTypes, chartThemes, chartsOutputDir) {
+  const paths = [];
+  for (const chartType of chartTypes) {
+    for (const chartTheme of chartThemes) {
+      paths.push(`${chartsOutputDir}/${chartType}--${chartTheme}.svg`);
+    }
+  }
+  return paths;
+}
+
+function validateChartPathConflicts({
+  publishChart,
+  outputPath,
+  chartOutputPath,
+  chartTypes,
+  chartThemes,
+  chartsOutputDir,
+}) {
+  if (!publishChart) return;
+
+  const matrixPaths = buildMatrixChartPaths(chartTypes, chartThemes, chartsOutputDir);
+  if (outputPath === chartOutputPath || matrixPaths.includes(outputPath)) {
+    throw new Error(
+      `Invalid chart configuration: 'output_path' (${outputPath}) overlaps chart output files. Use a dedicated JSON path (for example 'gh-dl/downloads.json') and keep chart files under 'chart_output_path'/'charts_output_dir'.`,
+    );
+  }
 }
 
 function validateSlug(value, name) {
@@ -165,6 +208,10 @@ function parseActionInputs(env = process.env) {
   const chartYTicksInput = getInput(env, "chart_y_ticks");
   const chartXLabelEveryDaysInput = getInput(env, "chart_x_label_every_days");
   const chartShowValueLabelsInput = getInput(env, "chart_show_value_labels");
+  const chartDateLabelFormatInput = getInput(env, "chart_date_label_format");
+  const chartShowGeneratedAtInput = getInput(env, "chart_show_generated_at");
+  const chartTitleModeInput = getInput(env, "chart_title_mode");
+  const chartTitleTextInput = getInput(env, "chart_title_text");
 
   const { owner, repo } = parseOwnerRepo(env, ownerInput, repoInput);
   const windowDays = parseInteger(windowDaysInput, "window_days", 45, 1, 3650);
@@ -199,6 +246,42 @@ function parseActionInputs(env = process.env) {
     "chart_show_value_labels",
     false,
   );
+  const chartDateLabelFormat = parseEnum(
+    chartDateLabelFormatInput,
+    "chart_date_label_format",
+    "yyyy-mm-dd",
+    CHART_DATE_LABEL_FORMATS,
+  );
+  const chartShowGeneratedAt = parseBoolean(
+    chartShowGeneratedAtInput,
+    "chart_show_generated_at",
+    true,
+  );
+  const chartTitleMode = parseEnum(
+    chartTitleModeInput,
+    "chart_title_mode",
+    "default",
+    CHART_TITLE_MODES,
+  );
+  const chartTitleText = chartTitleTextInput;
+  if (chartTitleMode === "custom" && chartTitleText.length === 0) {
+    throw new Error(
+      "Invalid chart configuration: 'chart_title_text' is required when 'chart_title_mode' is 'custom'.",
+    );
+  }
+  if (chartTitleText.length > 120) {
+    throw new Error(
+      `Invalid 'chart_title_text' length (${chartTitleText.length}). Maximum length is 120 characters.`,
+    );
+  }
+  validateChartPathConflicts({
+    publishChart,
+    outputPath,
+    chartOutputPath,
+    chartTypes,
+    chartThemes,
+    chartsOutputDir,
+  });
 
   return {
     token: tokenInput,
@@ -220,6 +303,10 @@ function parseActionInputs(env = process.env) {
     chartYTicks,
     chartXLabelEveryDays,
     chartShowValueLabels,
+    chartDateLabelFormat,
+    chartShowGeneratedAt,
+    chartTitleMode,
+    chartTitleText,
   };
 }
 

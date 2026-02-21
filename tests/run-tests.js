@@ -68,6 +68,10 @@ function testInputs() {
   assert.equal(parsed.chartYTicks, 6);
   assert.equal(parsed.chartXLabelEveryDays, 0);
   assert.equal(parsed.chartShowValueLabels, false);
+  assert.equal(parsed.chartDateLabelFormat, "yyyy-mm-dd");
+  assert.equal(parsed.chartShowGeneratedAt, true);
+  assert.equal(parsed.chartTitleMode, "default");
+  assert.equal(parsed.chartTitleText, "");
 }
 
 function testInputsChartMatrix() {
@@ -82,6 +86,10 @@ function testInputsChartMatrix() {
     INPUT_CHART_Y_TICKS: "10",
     INPUT_CHART_X_LABEL_EVERY_DAYS: "1",
     INPUT_CHART_SHOW_VALUE_LABELS: "true",
+    INPUT_CHART_DATE_LABEL_FORMAT: "dd/mm",
+    INPUT_CHART_SHOW_GENERATED_AT: "false",
+    INPUT_CHART_TITLE_MODE: "custom",
+    INPUT_CHART_TITLE_TEXT: "Downloads activity board",
   });
 
   assert.deepEqual(parsed.chartTypes, ["total-trend", "daily", "weekly", "monthly"]);
@@ -92,6 +100,63 @@ function testInputsChartMatrix() {
   assert.equal(parsed.chartYTicks, 10);
   assert.equal(parsed.chartXLabelEveryDays, 1);
   assert.equal(parsed.chartShowValueLabels, true);
+  assert.equal(parsed.chartDateLabelFormat, "dd/mm");
+  assert.equal(parsed.chartShowGeneratedAt, false);
+  assert.equal(parsed.chartTitleMode, "custom");
+  assert.equal(parsed.chartTitleText, "Downloads activity board");
+}
+
+function testInputsRejectInvalidChartEnums() {
+  assert.throws(
+    () =>
+      parseActionInputs({
+        GITHUB_REPOSITORY: "x/y",
+        INPUT_CHART_DATE_LABEL_FORMAT: "yyyy/mm/dd",
+      }),
+    /Allowed values: yyyy-mm-dd, yy\/mm\/dd, dd\/mm, mm\/dd, none/,
+  );
+
+  assert.throws(
+    () =>
+      parseActionInputs({
+        GITHUB_REPOSITORY: "x/y",
+        INPUT_CHART_TITLE_MODE: "repo",
+      }),
+    /Allowed values: default, custom, none/,
+  );
+
+  assert.throws(
+    () =>
+      parseActionInputs({
+        GITHUB_REPOSITORY: "x/y",
+        INPUT_CHART_TITLE_MODE: "custom",
+        INPUT_CHART_TITLE_TEXT: "",
+      }),
+    /chart_title_text' is required/,
+  );
+}
+
+function testInputsRejectChartOutputCollisions() {
+  assert.throws(
+    () =>
+      parseActionInputs({
+        GITHUB_REPOSITORY: "x/y",
+        INPUT_PUBLISH_CHART: "true",
+        INPUT_OUTPUT_PATH: "gh-dl/downloads.json",
+        INPUT_CHART_OUTPUT_PATH: "gh-dl/downloads.json",
+      }),
+    /overlaps chart output files/,
+  );
+
+  assert.throws(
+    () =>
+      parseActionInputs({
+        GITHUB_REPOSITORY: "x/y",
+        INPUT_PUBLISH_CHART: "true",
+        INPUT_OUTPUT_PATH: "gh-dl/charts/total-trend--slate.svg",
+      }),
+    /overlaps chart output files/,
+  );
 }
 
 function testGetFreshCachedTotal() {
@@ -183,6 +248,10 @@ async function testRunUsesCacheAndSkipsApi() {
       chartYTicks: 6,
       chartXLabelEveryDays: 0,
       chartShowValueLabels: false,
+      chartDateLabelFormat: "yyyy-mm-dd",
+      chartShowGeneratedAt: true,
+      chartTitleMode: "default",
+      chartTitleText: "",
     }),
     createGitHubClient: () => client,
     nowProvider: () => now,
@@ -277,6 +346,10 @@ async function testRunRetriesOnWriteConflict() {
       chartYTicks: 6,
       chartXLabelEveryDays: 0,
       chartShowValueLabels: false,
+      chartDateLabelFormat: "yyyy-mm-dd",
+      chartShowGeneratedAt: true,
+      chartTitleMode: "default",
+      chartTitleText: "",
     }),
     createGitHubClient: () => client,
     nowProvider: () => now,
@@ -369,6 +442,10 @@ async function testRunPublishesChartWhenEnabled() {
       chartYTicks: 6,
       chartXLabelEveryDays: 1,
       chartShowValueLabels: true,
+      chartDateLabelFormat: "yy/mm/dd",
+      chartShowGeneratedAt: true,
+      chartTitleMode: "custom",
+      chartTitleText: "Release Downloads Dashboard",
     }),
     createGitHubClient: () => client,
     nowProvider: () => now,
@@ -402,6 +479,8 @@ async function runTests() {
   testPayload();
   testInputs();
   testInputsChartMatrix();
+  testInputsRejectInvalidChartEnums();
+  testInputsRejectChartOutputCollisions();
   testGetFreshCachedTotal();
   testRetryableWriteConflictClassification();
   await testRunUsesCacheAndSkipsApi();

@@ -1,74 +1,14 @@
 "use strict";
 
 const { normalizeSeries } = require("./compute");
-
-const CHART_TYPES = ["total-trend", "daily", "weekly", "monthly"];
-const CHART_THEMES = ["black", "slate", "orange"];
-
-const CHART_TYPE_META = {
-  "total-trend": {
-    titleSuffix: "total trend",
-    latestLabel: "Latest total",
-    rangeDays: 0,
-  },
-  daily: {
-    titleSuffix: "daily delta",
-    latestLabel: "Latest day",
-    rangeDays: 1,
-  },
-  weekly: {
-    titleSuffix: "weekly delta",
-    latestLabel: "Latest week",
-    rangeDays: 7,
-  },
-  monthly: {
-    titleSuffix: "monthly delta",
-    latestLabel: "Latest month",
-    rangeDays: 30,
-  },
-};
-
-const CHART_THEME_META = {
-  black: {
-    background: "#0b0b0d",
-    title: "#f8fafc",
-    subtitle: "#cbd5e1",
-    grid: "#1f2937",
-    axis: "#94a3b8",
-    line: "#22d3ee",
-    dot: "#22d3ee",
-    latest: "#f8fafc",
-    fill: "#22d3ee",
-    empty: "#cbd5e1",
-    value: "#cbd5e1",
-  },
-  slate: {
-    background: "#0f172a",
-    title: "#e2e8f0",
-    subtitle: "#94a3b8",
-    grid: "#1e293b",
-    axis: "#94a3b8",
-    line: "#60a5fa",
-    dot: "#60a5fa",
-    latest: "#e2e8f0",
-    fill: "#60a5fa",
-    empty: "#cbd5e1",
-    value: "#cbd5e1",
-  },
-  orange: {
-    background: "#fff7ed",
-    title: "#7c2d12",
-    subtitle: "#9a3412",
-    grid: "#fed7aa",
-    axis: "#c2410c",
-    line: "#ea580c",
-    dot: "#ea580c",
-    latest: "#7c2d12",
-    fill: "#f97316",
-    empty: "#9a3412",
-    value: "#9a3412",
-  },
-};
+const {
+  CHART_TYPES,
+  CHART_THEMES,
+  CHART_DATE_LABEL_FORMATS,
+  CHART_TITLE_MODES,
+  CHART_TYPE_META,
+  CHART_THEME_META,
+} = require("./chart-config");
 
 function escapeXml(value) {
   return String(value)
@@ -81,6 +21,50 @@ function escapeXml(value) {
 
 function formatNumber(value) {
   return Number(value).toLocaleString("en-US");
+}
+
+function parseUtcDateParts(dateString) {
+  const date = new Date(`${dateString}T00:00:00.000Z`);
+  return {
+    year: date.getUTCFullYear(),
+    month: date.getUTCMonth() + 1,
+    day: date.getUTCDate(),
+  };
+}
+
+function pad2(value) {
+  return String(value).padStart(2, "0");
+}
+
+function formatDateLabel(dateString, dateLabelFormat) {
+  if (dateLabelFormat === "none") return "";
+  if (dateLabelFormat === "yyyy-mm-dd") return dateString;
+
+  const { year, month, day } = parseUtcDateParts(dateString);
+  const yy = pad2(year % 100);
+  const mm = pad2(month);
+  const dd = pad2(day);
+
+  if (dateLabelFormat === "yy/mm/dd") return `${yy}/${mm}/${dd}`;
+  if (dateLabelFormat === "dd/mm") return `${dd}/${mm}`;
+  if (dateLabelFormat === "mm/dd") return `${mm}/${dd}`;
+  return dateString;
+}
+
+function formatGeneratedDate(generatedAt, dateLabelFormat) {
+  if (typeof generatedAt !== "string" || generatedAt.length < 10) return generatedAt;
+  const datePart = generatedAt.slice(0, 10);
+  const format = dateLabelFormat === "none" ? "yyyy-mm-dd" : dateLabelFormat;
+  return formatDateLabel(datePart, format);
+}
+
+function buildTitle(owner, repo, titleMode, customTitle) {
+  if (titleMode === "none") return "";
+  if (titleMode === "custom") {
+    const trimmed = String(customTitle || "").trim();
+    return trimmed || `${owner}/${repo} release downloads`;
+  }
+  return `${owner}/${repo} release downloads`;
 }
 
 function shiftDate(dateString, daysAgo) {
@@ -201,11 +185,19 @@ function buildChartSvg({
   yTicks = 6,
   xLabelEveryDays = 0,
   showValueLabels = false,
+  dateLabelFormat = "yyyy-mm-dd",
+  showGeneratedAt = true,
+  titleMode = "default",
+  titleText = "",
 }) {
   const normalizedSeries = normalizeSeries(series);
   const entries = Object.entries(normalizedSeries).sort(([a], [b]) => a.localeCompare(b));
   const safeType = CHART_TYPES.includes(chartType) ? chartType : "total-trend";
   const safeTheme = CHART_THEMES.includes(chartTheme) ? chartTheme : "slate";
+  const safeDateLabelFormat = CHART_DATE_LABEL_FORMATS.includes(dateLabelFormat)
+    ? dateLabelFormat
+    : "yyyy-mm-dd";
+  const safeTitleMode = CHART_TITLE_MODES.includes(titleMode) ? titleMode : "default";
   const typeMeta = CHART_TYPE_META[safeType];
   const themeMeta = CHART_THEME_META[safeTheme];
   const safeWidth = clampInteger(width, 640, 4096, 1000);
@@ -227,13 +219,21 @@ function buildChartSvg({
   } = layout;
   const plotWidth = safeWidth - left - right;
   const plotHeight = safeHeight - top - bottom;
-  const title = `${owner}/${repo} release downloads (${typeMeta.titleSuffix})`;
-  const subtitle = `Generated ${generatedAt}`;
+  const title = buildTitle(owner, repo, safeTitleMode, titleText);
+  const subtitle = showGeneratedAt
+    ? `Generated ${formatGeneratedDate(generatedAt, safeDateLabelFormat)}`
+    : "";
   const gradientId = `fill-${safeType.replace(/[^a-z0-9]/g, "-")}-${safeTheme}`;
+  const titleNode = title
+    ? `<text class="title" x="${left}" y="${Math.round(top * 0.65)}">${escapeXml(title)}</text>`
+    : "";
+  const subtitleText = subtitle
+    ? `<text class="sub" x="${left}" y="${safeHeight - Math.max(8, Math.round(subtitleSize * 0.46))}">${escapeXml(subtitle)}</text>`
+    : "";
 
   if (entries.length === 0) {
     return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${safeWidth} ${safeHeight}" role="img" aria-label="${escapeXml(title)} chart">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${safeWidth} ${safeHeight}" role="img" aria-label="${escapeXml(title || `${owner}/${repo} downloads`)} chart">
   <defs>
     <style>
       .bg { fill: ${themeMeta.background}; }
@@ -243,8 +243,8 @@ function buildChartSvg({
     </style>
   </defs>
   <rect class="bg" x="0" y="0" width="${safeWidth}" height="${safeHeight}" rx="16" />
-  <text class="title" x="${left}" y="${Math.round(top * 0.65)}">${escapeXml(title)}</text>
-  <text class="sub" x="${left}" y="${safeHeight - Math.max(8, Math.round(subtitleSize * 0.46))}">${escapeXml(subtitle)}</text>
+  ${titleNode}
+  ${subtitleText}
   <text class="empty" x="${Math.round(safeWidth / 2)}" y="${Math.round(safeHeight / 2)}" text-anchor="middle">No snapshot data yet</text>
 </svg>
 `;
@@ -293,13 +293,16 @@ function buildChartSvg({
 
   const xLabelIndices = buildXLabelIndices(points, safeXLabelEveryDays);
   const xLabelY = safeHeight - Math.max(22, Math.round(bottom * 0.43));
-  const xLabels = xLabelIndices.map((index) => {
-    const point = points[index];
-    const isFirst = index === 0;
-    const isLast = index === points.length - 1;
-    const anchor = isFirst ? "start" : isLast ? "end" : "middle";
-    return `<text class="axis" x="${point.x.toFixed(2)}" y="${xLabelY}" text-anchor="${anchor}">${escapeXml(point.date)}</text>`;
-  });
+  const xLabels =
+    safeDateLabelFormat === "none"
+      ? []
+      : xLabelIndices.map((index) => {
+          const point = points[index];
+          const isFirst = index === 0;
+          const isLast = index === points.length - 1;
+          const anchor = isFirst ? "start" : isLast ? "end" : "middle";
+          return `<text class="axis" x="${point.x.toFixed(2)}" y="${xLabelY}" text-anchor="${anchor}">${escapeXml(formatDateLabel(point.date, safeDateLabelFormat))}</text>`;
+        });
 
   const valueLabels = showValueLabels
     ? points
@@ -311,7 +314,7 @@ function buildChartSvg({
     : "";
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${safeWidth} ${safeHeight}" role="img" aria-label="${escapeXml(title)} chart">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${safeWidth} ${safeHeight}" role="img" aria-label="${escapeXml(title || `${owner}/${repo} downloads`)} chart">
   <defs>
     <linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="${themeMeta.fill}" stop-opacity="0.32"/>
@@ -330,8 +333,8 @@ function buildChartSvg({
     </style>
   </defs>
   <rect class="bg" x="0" y="0" width="${safeWidth}" height="${safeHeight}" rx="16" />
-  <text class="title" x="${left}" y="${Math.round(top * 0.65)}">${escapeXml(title)}</text>
-  <text class="sub" x="${left}" y="${safeHeight - Math.max(8, Math.round(subtitleSize * 0.46))}">${escapeXml(subtitle)}</text>
+  ${titleNode}
+  ${subtitleText}
   ${grid.join("\n  ")}
   <path d="${areaPath}" fill="url(#${gradientId})"/>
   <polyline class="line" points="${pointText}"/>
@@ -365,4 +368,8 @@ module.exports = {
   buildTrendChartSvg,
   CHART_TYPES,
   CHART_THEMES,
+  CHART_DATE_LABEL_FORMATS,
+  CHART_TITLE_MODES,
+  CHART_THEME_META,
+  CHART_TYPE_META,
 };

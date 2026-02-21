@@ -37,7 +37,7 @@ inputs:
     required: false
     default: "false"
   chart_output_path:
-    description: "Path (within output_branch) for chart SVG."
+    description: "Path (within output_branch) for the primary chart SVG."
     required: false
     default: "gh-dl/downloads-trend.svg"
   chart_types:
@@ -76,6 +76,22 @@ inputs:
     description: "When true, renders numeric labels above each point."
     required: false
     default: "false"
+  chart_date_label_format:
+    description: "Date label format: yyyy-mm-dd,yy/mm/dd,dd/mm,mm/dd,none."
+    required: false
+    default: "yyyy-mm-dd"
+  chart_show_generated_at:
+    description: "When true, renders a generated-date footer."
+    required: false
+    default: "true"
+  chart_title_mode:
+    description: "Chart title style: default,custom,none."
+    required: false
+    default: "default"
+  chart_title_text:
+    description: "Custom chart title text (required when chart_title_mode=custom)."
+    required: false
+    default: ""
 
 outputs:
   owner:
