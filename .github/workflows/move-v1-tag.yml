@@ -22,7 +22,7 @@ jobs:
           set -euo pipefail
           ref_name="tags/v1"
           if gh api "repos/$REPOSITORY/git/ref/$ref_name" >/dev/null 2>&1; then
-            gh api --method PATCH "repos/$REPOSITORY/git/refs/$ref_name" -f sha="$SHA" -f force=true >/dev/null
+            gh api --method PATCH "repos/$REPOSITORY/git/refs/$ref_name" -f sha="$SHA" -F force=true >/dev/null
             echo "Updated refs/$ref_name -> $SHA"
           else
             gh api --method POST "repos/$REPOSITORY/git/refs" -f ref="refs/$ref_name" -f sha="$SHA" >/dev/null
