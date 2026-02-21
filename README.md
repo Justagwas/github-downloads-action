@@ -13,12 +13,12 @@ No separate API server needed.
 
 ## Start here (quick install)
 
-1. Open the Marketplace listing: `https://github.com/marketplace/actions/github-downloads-action`
-2. Click `Use latest action`, then create a workflow in your repo.
-3. Pick a template and paste it into `.github/workflows/`:
+1. Pick one template and download/copy it:
    - Daily JSON only: https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily.yml
    - Hourly profile: https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-hourly.yml
    - Daily JSON + charts: https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily-with-chart.yml
+2. Put the file in your repo under `.github/workflows/`.
+3. Commit and push.
 4. Run the workflow once with `workflow_dispatch`.
 5. Add one or both badges to your README (replace `_OWNER_`/`_REPOSITORY_`):
 
