@@ -34,7 +34,7 @@ Choose one setup template:
 
 Marketplace listing: https://github.com/marketplace/actions/github-downloads-action
 
-Note: private repositories usually cannot render public badges.
+Note: private repositories usually cannot render public badges.  
 Note: this repository has little/no release-asset activity, so preview values are expected to be low.
 
 ## Why this action exists
@@ -219,9 +219,9 @@ Chart options:
 - `chart_output_path`: primary chart path (first `chart_types` + first `chart_themes`)
 - `charts_output_dir`: directory for all matrix charts (`<type>--<theme>.svg`)
 
-Note: `chart_output_path` publishes one primary chart, while `charts_output_dir` publishes the full chart matrix.
-Note: for safety, `output_path` cannot overlap any chart output file when `publish_chart` is enabled.
-Implementation note: chart types/themes/date/title enums are centralized in `src/lib/chart-config.js`.
+Note: `chart_output_path` publishes one primary chart, while `charts_output_dir` publishes the full chart matrix.  
+Note: for safety, `output_path` cannot overlap any chart output file when `publish_chart` is enabled.  
+Implementation note: chart types/themes/date/title enums are centralized in `src/lib/chart-config.js`.  
 
 Dense chart example (more Y values, daily date labels, and numbers):
 
