@@ -3,7 +3,7 @@
   "owner": "Justagwas",
   "repo": "github-downloads-action",
   "visibility": "public",
-  "generatedAt": "2026-06-27T06:32:52.522Z",
+  "generatedAt": "2026-06-28T07:05:48.281Z",
   "stats": {
     "total": 0,
     "day": 0,
@@ -18,10 +18,9 @@
   "snapshots": {
     "windowDays": 45,
     "count": 45,
-    "firstDate": "2026-05-14",
-    "lastDate": "2026-06-27",
+    "firstDate": "2026-05-15",
+    "lastDate": "2026-06-28",
     "series": {
-      "2026-05-14": 0,
       "2026-05-15": 0,
       "2026-05-16": 0,
       "2026-05-17": 0,
@@ -65,7 +64,8 @@
       "2026-06-24": 0,
       "2026-06-25": 0,
       "2026-06-26": 0,
-      "2026-06-27": 0
+      "2026-06-27": 0,
+      "2026-06-28": 0
     }
   },
   "profile": {
