@@ -8,7 +8,7 @@ on:
     inputs:
       tag:
         description: "Tag to release"
-        required: false
+        required: true
         type: string
 
 permissions:
@@ -17,8 +17,11 @@ permissions:
 jobs:
   validate-release:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ inputs.tag || github.ref }}
       - name: Run tests
         shell: bash
         run: |
@@ -34,6 +37,7 @@ jobs:
     needs:
       - validate-release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Resolve tag
         id: resolve
@@ -59,11 +63,7 @@ jobs:
         run: |
           set -euo pipefail
           if gh release view "$TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
-            notes_file="$(mktemp)"
-            gh api --method POST "repos/$REPOSITORY/releases/generate-notes" -f tag_name="$TAG" --jq '.body' > "$notes_file"
-            gh release edit "$TAG" --repo "$REPOSITORY" --notes-file "$notes_file"
-            rm -f "$notes_file"
-            echo "Updated release notes for $TAG."
+            echo "Release for $TAG already exists; leaving it unchanged."
           else
             gh release create "$TAG" --repo "$REPOSITORY" --verify-tag --generate-notes
             echo "Created release for $TAG."

@@ -11,6 +11,7 @@ permissions:
 jobs:
   move-v1:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Move v1 tag to latest v1.x.y release tag commit
         shell: bash
