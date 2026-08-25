@@ -7,9 +7,9 @@
 [![Actionlint](https://github.com/justagwas/github-downloads-action/actions/workflows/actionlint.yml/badge.svg)](https://github.com/justagwas/github-downloads-action/actions/workflows/actionlint.yml)
 [![CodeQL](https://github.com/justagwas/github-downloads-action/actions/workflows/codeql.yml/badge.svg)](https://github.com/justagwas/github-downloads-action/actions/workflows/codeql.yml)
 
-Track total, daily, weekly, and monthly release downloads with a GitHub Action that writes badge-ready JSON and optional SVG charts.
+Keep track of GitHub Release downloads over time and present the results as clean badges or optional charts.
 
-No separate API server needed.
+The history stays in your repository, with no separate statistics server to maintain.
 
 ## Start here (quick install)
 
@@ -17,15 +17,15 @@ Choose one setup template:
 
 | Setup | Use when | Template |
 |---|---|---|
-| Daily JSON only | You only want badge data (`downloads.json`) | https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily.yml |
-| Hourly profile | You want more frequent snapshots | https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-hourly.yml |
-| Daily JSON + charts | You want badges plus published SVG charts | https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily-with-chart.yml |
+| Daily badges | You want a simple daily download total | https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily.yml |
+| More frequent updates | You want the current day to refresh more often | https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-hourly.yml |
+| Daily badges and charts | You want download numbers and visual trends | https://github.com/justagwas/github-downloads-action/blob/main/templates/workflows/gh-dl-daily-with-chart.yml |
 
-1. Download/copy your selected template.
-2. Put the file in your repo under `.github/workflows/`.
+1. Download or copy the template that matches the result you want.
+2. Place the file in the repository under `.github/workflows/`.
 3. Commit and push.
-4. Run the workflow once with `workflow_dispatch`.
-5. Add one or both badges to your README (replace `_OWNER_`/`_REPOSITORY_`):
+4. Open the repository's **Actions** tab and select **Run workflow** once.
+5. Add one or both badges to the README, replacing `_OWNER_` and `_REPOSITORY_`:
 
 ```md
 ![Downloads total](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2F_OWNER_%2F_REPOSITORY_%2Fgh-pages%2Fgh-dl%2Fdownloads.json&query=%24.stats.total&label=downloads%2Ftotal&color=0A7EA4)
@@ -34,49 +34,44 @@ Choose one setup template:
 
 Marketplace listing: https://github.com/marketplace/actions/github-downloads-action
 
-Note: private repositories usually cannot render public badges.  
-Note: this repository has little/no release-asset activity, so preview values are expected to be low.
+Public badges need a publicly readable result file. Private repositories usually cannot display them to signed out visitors.
+
+This repository has little release file activity, so its example values are expected to be modest.
 
 ## Why this action exists
 
-GitHub does not give you built-in daily/weekly/monthly release download stats.
+GitHub shows how many times each file attached to a release has been downloaded, but it does not show how that total changed over time.
 
-Polling the GitHub Releases API on every badge request is noisy and can hit rate limits.
+GitHub Downloads Action keeps that short history for you. On a schedule you choose, it reads the current numbers, saves the total for the day, and updates the small files used by your badges and charts.
 
-This action keeps things simple:
-
-- each repository computes its own totals on a schedule
-- it publishes one static JSON file
-- badges read that file URL
-
-Result: simple, scalable, and low-maintenance.
+Everything remains in the repository, making the result easy to inspect, reuse, and remove without depending on a hosted analytics account.
 
 ## How it works (short version)
 
-1. The action reads all releases for a target repo and sums release asset `download_count` values.
-2. It merges today's total into a rolling snapshot series (`window_days`, default `45`).
-3. It computes `total`, `day` (1-day delta), `week` (7-day delta), and `month` (30-day delta).
-4. It marks `partial.day/week/month` when exact baseline coverage is missing.
-5. It writes JSON to `output_branch:output_path` (default `gh-pages:gh-dl/downloads.json`).
-6. Optional: it can also publish static SVG charts (`publish_chart: "true"`) across chart type/theme combinations.
+1. Read the download number for every file attached to the repository's GitHub Releases.
+2. Add those numbers together and save one total for the current day.
+3. Compare the available history to show one day, seven day, and thirty day changes.
+4. Clearly mark a comparison as partial when there is not yet enough history for the complete period.
+5. Publish the result to `gh-pages:gh-dl/downloads.json` by default.
+6. Optionally publish chart images from the same history.
 
 ## Architecture at a glance
 
 ```mermaid
 flowchart LR
   A[Scheduled workflow] --> B[github-downloads-action]
-  B --> C[GitHub Releases API]
+  B --> C[Current release download totals]
   C --> B
-  B --> D[Snapshot + delta compute]
-  D --> E[downloads.json]
-  D --> F[downloads-trend.svg + chart matrix optional]
-  E --> G[Shields badges]
-  F --> H[README image/chart preview]
+  B --> D[Daily history and comparisons]
+  D --> E[Badge data]
+  D --> F[Optional chart images]
+  E --> G[README badges]
+  F --> H[README charts]
 ```
 
 ## About the source URL
 
-Your badge source is simply the public URL of the JSON file this action publishes.
+The badge reads the small public data file produced by the action. With the default settings, its address follows this pattern:
 
 Default source URL pattern:
 
@@ -84,12 +79,12 @@ Default source URL pattern:
 https://raw.githubusercontent.com/<_OWNER_>/<_REPO_>/gh-pages/gh-dl/downloads.json
 ```
 
-`gh-pages` here is just a storage branch for generated data. You do not need to enable GitHub Pages site hosting for this to work.
+`gh-pages` is simply the branch used to store the generated files. You do not need to create or enable a GitHub Pages website.
 
 `raw` vs `jsDelivr`:
 
-- `raw.githubusercontent.com` (default in this README): direct and simple.
-- `cdn.jsdelivr.net`: often faster globally, but cache lag can be longer in some cases.
+- `raw.githubusercontent.com` is direct and simple, and is used by the examples in this README.
+- `cdn.jsdelivr.net` can be faster in some locations, although updates may take longer to appear.
 
 Alternative jsDelivr pattern:
 
@@ -99,20 +94,23 @@ https://cdn.jsdelivr.net/gh/<_OWNER_>/<_REPO_>@gh-pages/gh-dl/downloads.json
 
 ## Warm-up period (important)
 
-This action needs a bit of history before week/month deltas become exact.
+Weekly and monthly comparisons need earlier daily totals. A new setup therefore takes time to build a complete history.
 
-- New repos often show `partial.week = true` and `partial.month = true` at first.
-- `day/week/month` can look lower than expected while history builds.
-- This is expected behavior, not a bug.
+- Daily comparisons can become complete after two consecutive dates.
+- Weekly comparisons need eight daily dates.
+- Monthly comparisons need thirty one daily dates.
+- A missing scheduled run can make a comparison partial again.
+
+A partial value is not a failure. It is the best comparison available from the dates collected so far.
 
 Typical first 30 days:
 
 | Snapshot age | `partial.day` | `partial.week` | `partial.month` | Notes |
 |---|---|---|---|---|
-| Day 0-1 | `true` | `true` | `true` | first run has no prior baseline |
-| Day 2-7 | usually `false` | `true` | `true` | day settles first |
-| Day 8-30 | usually `false` | usually `false` | `true` | week settles if snapshots are daily |
-| Day 31+ | usually `false` | usually `false` | usually `false` | exact if no gaps |
+| Day 0-1 | `true` | `true` | `true` | The first run has no earlier total |
+| Day 2-7 | usually `false` | `true` | `true` | Daily comparison becomes available first |
+| Day 8-30 | usually `false` | usually `false` | `true` | Weekly comparison becomes available next |
+| Day 31+ | usually `false` | usually `false` | usually `false` | Complete when the required dates have no gaps |
 
 ## README badge examples (copy-paste)
 
@@ -422,17 +420,17 @@ For the `v1` major line, the project follows these stability expectations:
 
 ## Partial flags (plain language)
 
-- `partial: false` means the action found an exact baseline snapshot for that range.
-- `partial: true` means coverage is still warming or has gaps, so the range delta uses best available baseline.
+- `partial: false` means the action has the exact earlier date needed for that comparison.
+- `partial: true` means the history is still growing or contains a date gap, so the action uses the closest available earlier total.
 
-For new repos, expect `partial.week/month = true` until enough days are collected.
+For a new setup, expect weekly and monthly comparisons to remain partial until enough daily history has been collected.
 
 ## Known limits
 
-- Warm-up period: `week` and `month` may be partial until enough history exists.
-- Snapshot model: values are based on snapshot deltas, not event-level analytics.
-- Badge caching: GitHub Raw/Shields caching can delay visible updates.
-- Manual reruns on the same day may return `published=false` when there is no material change.
+- Weekly and monthly comparisons may be partial while the history is still growing.
+- The action records daily totals, not individual download events or unique users.
+- GitHub Raw and badge caching can delay when a new value becomes visible.
+- Running the action again on the same day may produce no new commit when nothing has changed.
 
 ## Troubleshooting
 
@@ -457,6 +455,7 @@ If your repository has few or no release-asset downloads, totals and deltas will
 - Visual setup + generators:
   - Project page: https://justagwas.com/projects/gda
   - Generator Lab: https://justagwas.com/projects/gda#generator-lab
+- Complete documentation: <https://github.com/Justagwas/github-downloads-action/wiki>
 - Badge examples: [README badge examples (copy-paste)](#readme-badge-examples-copy-paste)
 - Charts and chart options: [Charts (optional)](#charts-optional)
 - All inputs: [Inputs](#inputs)
@@ -481,15 +480,28 @@ If your repository has few or no release-asset downloads, totals and deltas will
 | `breaking-change` | Behavior/input/output change requiring migration |
 | `performance` | API load/runtime efficiency work |
 
-## Community and support
+## Security
 
-- Contributing guide: `.github/CONTRIBUTING.md`
-- Code owners: `.github/CODEOWNERS`
-- Code of conduct: `.github/CODE_OF_CONDUCT.md`
-- Security policy: `.github/SECURITY.md`
-- Support policy: `.github/SUPPORT.md`
-- Privacy notice: `.github/PRIVACY.md`
-- Marketplace EULA: `.github/EULA.md`
+- Use the official [GitHub Marketplace listing](https://github.com/marketplace/actions/github-downloads-action) or a trusted release reference such as `@v1`.
+- Grant the workflow only the repository permissions required for its selected output.
+- Remember that public badges need a publicly readable result file.
+- Refer to [`.github/SECURITY.md`](.github/SECURITY.md) for the security policy and private vulnerability reporting procedure.
+- Additional policies are available in [`.github/PRIVACY.md`](.github/PRIVACY.md) and [`.github/EULA.md`](.github/EULA.md).
+
+## Contributing
+
+Contributions are welcome.
+
+- Start with [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md)
+- Follow [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md)
+- Use [Issues](https://github.com/Justagwas/github-downloads-action/issues) for defect reports, feature proposals, and questions
+- Refer to [`.github/SUPPORT.md`](.github/SUPPORT.md) for support guidance
+- Wiki: <https://github.com/Justagwas/github-downloads-action/wiki>
+
+## Contact
+
+- Email: [email@justagwas.com](mailto:email@justagwas.com)
+- Website: <https://www.justagwas.com/projects/gda>
 
 ## License
 
