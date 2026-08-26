@@ -485,7 +485,7 @@ If your repository has few or no release-asset downloads, totals and deltas will
 - Use the official [GitHub Marketplace listing](https://github.com/marketplace/actions/github-downloads-action) or a trusted release reference such as `@v1`.
 - Grant the workflow only the repository permissions required for its selected output.
 - Remember that public badges need a publicly readable result file.
-- Refer to [`.github/SECURITY.md`](.github/SECURITY.md) for the security policy and private vulnerability reporting procedure.
+- Refer to the repository [Security Policy](https://github.com/Justagwas/github-downloads-action/security/policy) for private vulnerability reporting.
 - Additional policies are available in [`.github/PRIVACY.md`](.github/PRIVACY.md) and [`.github/EULA.md`](.github/EULA.md).
 
 ## Contributing
@@ -493,9 +493,9 @@ If your repository has few or no release-asset downloads, totals and deltas will
 Contributions are welcome.
 
 - Start with [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md)
-- Follow [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md)
+- Follow the shared [Code of Conduct](https://github.com/Justagwas/.github/blob/main/CODE_OF_CONDUCT.md)
 - Use [Issues](https://github.com/Justagwas/github-downloads-action/issues) for defect reports, feature proposals, and questions
-- Refer to [`.github/SUPPORT.md`](.github/SUPPORT.md) for support guidance
+- Refer to the shared [Support guidance](https://github.com/Justagwas/.github/blob/main/SUPPORT.md)
 - Wiki: <https://github.com/Justagwas/github-downloads-action/wiki>
 
 ## Contact

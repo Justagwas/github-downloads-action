@@ -20,7 +20,7 @@ If there is a conflict between this EULA and Apache-2.0 for code licensing, Apac
 
 ## 3. Support scope
 
-Support is provided on a best-effort basis through this repository (`SUPPORT.md`).
+Support is provided on a best-effort basis under the shared [Support Policy](https://github.com/Justagwas/.github/blob/main/SUPPORT.md).
 
 No guaranteed SLA, uptime, response time, or custom feature work is promised unless separately agreed in writing.
 
@@ -46,5 +46,4 @@ This EULA may be updated in future releases. Continued use after an update means
 
 ## 9. Contact
 
-For license/support questions, use the support channels described in `SUPPORT.md`.
-
+For license or support questions, follow the shared [Support Policy](https://github.com/Justagwas/.github/blob/main/SUPPORT.md).

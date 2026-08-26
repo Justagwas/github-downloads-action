@@ -58,5 +58,4 @@ If you use this action, you are responsible for:
 
 ## Contact
 
-For privacy-related questions about this action, open an issue or follow `SUPPORT.md`.
-
+For privacy-related questions about this action, open an issue or follow the shared [Support Policy](https://github.com/Justagwas/.github/blob/main/SUPPORT.md).
