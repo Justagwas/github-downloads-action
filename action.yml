@@ -134,7 +134,7 @@ outputs:
     description: "Whether downloads.json was updated in this run."
 
 runs:
-  using: "node20"
+  using: "node24"
   main: "src/index.js"
 
 branding:

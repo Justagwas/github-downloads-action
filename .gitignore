@@ -3,6 +3,7 @@ node_modules/
 dist/
 coverage/
 private-tests/
+/notes/
 .npm/
 .pnpm-store/
 .yarn/

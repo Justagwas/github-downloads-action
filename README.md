@@ -2,7 +2,7 @@
 
 [![Release](https://img.shields.io/github/v/release/justagwas/github-downloads-action?display_name=tag)](https://github.com/justagwas/github-downloads-action/releases)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Runtime Node 20](https://img.shields.io/badge/runtime-node%2020-43853d)](https://docs.github.com/en/actions)
+[![Runtime Node 24](https://img.shields.io/badge/runtime-node%2024-43853d)](https://docs.github.com/en/actions)
 [![Tests](https://github.com/justagwas/github-downloads-action/actions/workflows/compat-check.yml/badge.svg)](https://github.com/justagwas/github-downloads-action/actions/workflows/compat-check.yml)
 [![Actionlint](https://github.com/justagwas/github-downloads-action/actions/workflows/actionlint.yml/badge.svg)](https://github.com/justagwas/github-downloads-action/actions/workflows/actionlint.yml)
 [![CodeQL](https://github.com/justagwas/github-downloads-action/actions/workflows/codeql.yml/badge.svg)](https://github.com/justagwas/github-downloads-action/actions/workflows/codeql.yml)
@@ -96,21 +96,23 @@ https://cdn.jsdelivr.net/gh/<_OWNER_>/<_REPO_>@gh-pages/gh-dl/downloads.json
 
 Weekly and monthly comparisons need earlier daily totals. A new setup therefore takes time to build a complete history.
 
-- Daily comparisons can become complete after two consecutive dates.
-- Weekly comparisons need eight daily dates.
-- Monthly comparisons need thirty one daily dates.
-- A missing scheduled run can make a comparison partial again.
+- Daily comparisons need a snapshot from one day earlier.
+- Weekly comparisons need a snapshot from seven days earlier.
+- Monthly comparisons need a snapshot from thirty days earlier.
+- A comparison is complete when its exact earlier date is available. Missing intermediate dates do not make that comparison partial.
 
 A partial value is not a failure. It is the best comparison available from the dates collected so far.
 
-Typical first 30 days:
+Typical first 30 days, with a snapshot collected each day:
 
 | Snapshot age | `partial.day` | `partial.week` | `partial.month` | Notes |
 |---|---|---|---|---|
-| Day 0-1 | `true` | `true` | `true` | The first run has no earlier total |
-| Day 2-7 | usually `false` | `true` | `true` | Daily comparison becomes available first |
-| Day 8-30 | usually `false` | usually `false` | `true` | Weekly comparison becomes available next |
-| Day 31+ | usually `false` | usually `false` | usually `false` | Complete when the required dates have no gaps |
+| Day 0 | `true` | `true` | `true` | The first run has no earlier total |
+| Days 1-6 | `false` | `true` | `true` | Daily comparison becomes available first |
+| Days 7-29 | `false` | `false` | `true` | Weekly comparison becomes available next |
+| Day 30+ | `false` | `false` | `false` | All three exact baseline dates are available |
+
+Snapshot age is the number of elapsed days since the first snapshot. If a required baseline date is missing or has been pruned, its comparison remains partial.
 
 ## README badge examples (copy-paste)
 
@@ -274,7 +276,18 @@ Theme preview (same chart, 3 themes):
 Generate Markdown image lines for selected chart types/themes.
 
 ```bash
-node -e "const owner='_OWNER_';const repo='_REPOSITORY_';const types='total-trend,daily,weekly,monthly'.split(',');const themes='black,slate,orange'.split(',');const base=`https://raw.githubusercontent.com/${owner}/${repo}/gh-pages`;for(const t of types){for(const th of themes){console.log(`![Downloads ${t} ${th}](${base}/gh-dl/charts/${t}--${th}.svg)`);}}"
+node <<'NODE'
+const owner = '_OWNER_';
+const repo = '_REPOSITORY_';
+const types = ['total-trend', 'daily', 'weekly', 'monthly'];
+const themes = ['black', 'slate', 'orange'];
+const base = `https://raw.githubusercontent.com/${owner}/${repo}/gh-pages`;
+for (const type of types) {
+  for (const theme of themes) {
+    console.log(`![Downloads ${type} ${theme}](${base}/gh-dl/charts/${type}--${theme}.svg)`);
+  }
+}
+NODE
 ```
 
 PowerShell variant:
@@ -297,7 +310,23 @@ foreach ($type in $types) {
 Generate all badge markdown lines for a repo.
 
 ```bash
-node -e "const owner='_OWNER_';const repo='_REPOSITORY_';const src=`https://raw.githubusercontent.com/${owner}/${repo}/gh-pages/gh-dl/downloads.json`;const u=encodeURIComponent(src);const defs=[['total','$.stats.total','0A7EA4'],['day','$.stats.day','1E8E3E'],['week','$.stats.week','0069C2'],['month','$.stats.month','B26A00'],['profile','$.profile.defaultMode','5E35B1']];for(const[d,q,c]of defs){const label=encodeURIComponent(`downloads/${d}`);const query=encodeURIComponent(q);console.log(`![Downloads ${d}](https://img.shields.io/badge/dynamic/json?url=${u}&query=${query}&label=${label}&color=${c})`);}"
+node <<'NODE'
+const owner = '_OWNER_';
+const repo = '_REPOSITORY_';
+const src = `https://raw.githubusercontent.com/${owner}/${repo}/gh-pages/gh-dl/downloads.json`;
+const url = encodeURIComponent(src);
+const definitions = [
+  ['total', '$.stats.total', '0A7EA4'],
+  ['day', '$.stats.day', '1E8E3E'],
+  ['week', '$.stats.week', '0069C2'],
+  ['month', '$.stats.month', 'B26A00'],
+  ['profile', '$.profile.defaultMode', '5E35B1'],
+];
+for (const [metric, query, color] of definitions) {
+  const label = encodeURIComponent(`downloads/${metric}`);
+  console.log(`![Downloads ${metric}](https://img.shields.io/badge/dynamic/json?url=${url}&query=${encodeURIComponent(query)}&label=${label}&color=${color})`);
+}
+NODE
 ```
 
 PowerShell variant:
@@ -421,7 +450,7 @@ For the `v1` major line, the project follows these stability expectations:
 ## Partial flags (plain language)
 
 - `partial: false` means the action has the exact earlier date needed for that comparison.
-- `partial: true` means the history is still growing or contains a date gap, so the action uses the closest available earlier total.
+- `partial: true` means the exact baseline date is missing, so the action uses an available snapshot and marks the comparison as incomplete.
 
 For a new setup, expect weekly and monthly comparisons to remain partial until enough daily history has been collected.
 

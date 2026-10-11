@@ -26,7 +26,6 @@ function main() {
     "src/lib/chart-config.js",
     ".github/EULA.md",
     ".github/PRIVACY.md",
-    ".github/SUPPORT.md",
     "templates/workflows/gh-dl-daily.yml",
     "templates/workflows/gh-dl-hourly.yml",
     "templates/workflows/gh-dl-daily-with-chart.yml",
@@ -58,6 +57,12 @@ function main() {
     assertIncludes(
       errors,
       "README.md",
+      "https://github.com/Justagwas/.github/blob/main/SUPPORT.md",
+      "shared support policy link",
+    );
+    assertIncludes(
+      errors,
+      "README.md",
       "https://justagwas.com/projects/gda#generator-lab",
       "generator lab link",
     );
@@ -65,6 +70,15 @@ function main() {
     assertIncludes(errors, "README.md", "chart_show_generated_at", "generated footer docs");
     assertIncludes(errors, "README.md", "chart_title_mode", "title mode docs");
     assertIncludes(errors, "README.md", "chart_title_text", "custom title docs");
+  }
+
+  if (fileExists(".github/EULA.md")) {
+    assertIncludes(
+      errors,
+      ".github/EULA.md",
+      "https://github.com/Justagwas/.github/blob/main/SUPPORT.md",
+      "shared support policy link",
+    );
   }
 
   if (fileExists("templates/workflows/gh-dl-daily-with-chart.yml")) {
